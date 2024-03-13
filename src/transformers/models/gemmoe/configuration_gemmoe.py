@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Gemma model configuration"""
+""" Gemmoe model configuration"""
 
 from ...configuration_utils import PretrainedConfig
 from ...utils import logging
@@ -20,25 +20,26 @@ from ...utils import logging
 
 logger = logging.get_logger(__name__)
 
-GEMMA_PRETRAINED_CONFIG_ARCHIVE_MAP = {}
+GEMMOE_PRETRAINED_CONFIG_ARCHIVE_MAP = {
+    "Crystalcareai/GemMoE-Beta-1": "https://huggingface.co/Crystalcareai/GemMoE-Beta-1/resolve/main/config.json",
+}
 
 
-class GemmaConfig(PretrainedConfig):
+class GemmoeConfig(PretrainedConfig):
     r"""
-    This is the configuration class to store the configuration of a [`GemmaModel`]. It is used to instantiate an Gemma
+    This is the configuration class to store the configuration of a [`GemmoeModel`]. It is used to instantiate a Gemmoe
     model according to the specified arguments, defining the model architecture. Instantiating a configuration with the
-    defaults will yield a similar configuration to that of the Gemma-7B.
+    defaults will yield a similar configuration to that of the Gemmoe-7B.
 
-    e.g. [google/gemma-7b](https://huggingface.co/google/gemma-7b)
+    e.g. [mhenrichsen/gemmoe-7b](https://huggingface.co/mhenrichsen/gemmoe-7b)
 
     Configuration objects inherit from [`PretrainedConfig`] and can be used to control the model outputs. Read the
     documentation from [`PretrainedConfig`] for more information.
 
-
     Args:
         vocab_size (`int`, *optional*, defaults to 256000):
-            Vocabulary size of the Gemma model. Defines the number of different tokens that can be represented by the
-            `inputs_ids` passed when calling [`GemmaModel`]
+            Vocabulary size of the Gemmoe model. Defines the number of different tokens that can be represented by the
+            `inputs_ids` passed when calling [`GemmoeModel`]
         hidden_size (`int`, *optional*, defaults to 3072):
             Dimension of the hidden representations.
         intermediate_size (`int`, *optional*, defaults to 24576):
@@ -53,17 +54,17 @@ class GemmaConfig(PretrainedConfig):
             `num_key_value_heads=1 the model will use Multi Query Attention (MQA) otherwise GQA is used. When
             converting a multi-head checkpoint to a GQA checkpoint, each group key and value head should be constructed
             by meanpooling all the original heads within that group. For more details checkout [this
-            paper](https://arxiv.org/pdf/2305.13245.pdf). If it is not specified, will default to
+            paper](https://arxiv.org/pdf/2305.13245.pdf). If it is not specified, will default to 
             `num_attention_heads`.
         head_dim (`int`, *optional*, defaults to 256):
             The attention head dimension.
         hidden_act (`str` or `function`, *optional*, defaults to `"gelu"`):
-            The non-linear activation function (function or string) in the decoder.
+            The non-linear activation function (function or string) in the decoder.  
         max_position_embeddings (`int`, *optional*, defaults to 8192):
             The maximum sequence length that this model might ever be used with.
         initializer_range (`float`, *optional*, defaults to 0.02):
             The standard deviation of the truncated_normal_initializer for initializing all weight matrices.
-        rms_norm_eps (`float`, *optional*, defaults to 1e-06):
+        rms_norm_eps (`float`, *optional*, defaults to 1e-6):  
             The epsilon used by the rms normalization layers.
         use_cache (`bool`, *optional*, defaults to `True`):
             Whether or not the model should return the last key/values attentions (not used by all models). Only
@@ -71,10 +72,10 @@ class GemmaConfig(PretrainedConfig):
         pad_token_id (`int`, *optional*, defaults to 0):
             Padding token id.
         eos_token_id (`int`, *optional*, defaults to 1):
-            End of stream token id.
+            End of stream token id.  
         bos_token_id (`int`, *optional*, defaults to 2):
             Beginning of stream token id.
-        tie_word_embeddings (`bool`, *optional*, defaults to `True`):
+        tie_word_embeddings (`bool`, *optional*, defaults to `True`): 
             Whether to tie weight embeddings
         rope_theta (`float`, *optional*, defaults to 10000.0):
             The base period of the RoPE embeddings.
@@ -82,21 +83,30 @@ class GemmaConfig(PretrainedConfig):
             Whether to use a bias in the query, key, value and output projection layers during self-attention.
         attention_dropout (`float`, *optional*, defaults to 0.0):
             The dropout ratio for the attention probabilities.
+        num_experts_per_tok (`int`, *optional*, defaults to 2):
+            The number of experts used in the sparse mixture of experts layer.
+        num_local_experts (`int`, *optional*, defaults to 8):  
+            The number of local experts used in the sparse mixture of experts layer.
+        router_aux_loss_coef (`float`, *optional*, defaults to 0.01):
+            The coefficient for the auxiliary loss of the router.
+        output_router_logits (`bool`, *optional*, defaults to `False`):
+            Whether or not to output the logits of the routers. They are useful for computing the router loss, and
+            should not be returned during inference.
 
     ```python
-    >>> from transformers import GemmaModel, GemmaConfig
+    >>> from transformers import GemmoeModel, GemmoeConfig
 
-    >>> # Initializing a Gemma gemma-7b style configuration
-    >>> configuration = GemmaConfig()
+    >>> # Initializing a Gemmoe gemmoe-7b style configuration
+    >>> configuration = GemmoeConfig()
 
-    >>> # Initializing a model from the gemma-7b style configuration
-    >>> model = GemmaModel(configuration)
+    >>> # Initializing a model from the gemmoe-7b style configuration
+    >>> model = GemmoeModel(configuration)
 
-    >>> # Accessing the model configuration
+    >>> # Accessing the model configuration 
     >>> configuration = model.config
     ```"""
 
-    model_type = "gemma"
+    model_type = "gemmoe"
     keys_to_ignore_at_inference = ["past_key_values"]
 
     def __init__(
@@ -120,10 +130,14 @@ class GemmaConfig(PretrainedConfig):
         rope_theta=10000.0,
         attention_bias=False,
         attention_dropout=0.0,
+        num_experts_per_tok=2,
+        num_local_experts=8,
+        router_aux_loss_coef=0.01,
+        output_router_logits=False,
         **kwargs,
     ):
         self.vocab_size = vocab_size
-        self.max_position_embeddings = max_position_embeddings
+        self.max_position_embeddings = max_position_embeddings        
         self.hidden_size = hidden_size
         self.intermediate_size = intermediate_size
         self.num_hidden_layers = num_hidden_layers
@@ -135,9 +149,13 @@ class GemmaConfig(PretrainedConfig):
         self.rms_norm_eps = rms_norm_eps
         self.use_cache = use_cache
         self.rope_theta = rope_theta
-        self.attention_bias = attention_bias
+        self.attention_bias = attention_bias 
         self.attention_dropout = attention_dropout
-
+        self.num_experts_per_tok = num_experts_per_tok
+        self.num_local_experts = num_local_experts
+        self.router_aux_loss_coef = router_aux_loss_coef
+        self.output_router_logits = output_router_logits
+         
         super().__init__(
             pad_token_id=pad_token_id,
             bos_token_id=bos_token_id,

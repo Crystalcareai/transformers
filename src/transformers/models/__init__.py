@@ -93,6 +93,7 @@ from . import (
     funnel,
     fuyu,
     gemma,
+    gemmoe,
     git,
     glpn,
     gpt2,

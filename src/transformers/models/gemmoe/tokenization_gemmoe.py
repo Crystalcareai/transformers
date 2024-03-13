@@ -12,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""Tokenization classes for Gemma."""
+"""Tokenization classes for Gemmoe."""
 import os
 from shutil import copyfile
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
@@ -22,7 +21,6 @@ import sentencepiece as spm
 
 from ...tokenization_utils import AddedToken, PreTrainedTokenizer
 from ...utils import logging
-
 
 if TYPE_CHECKING:
     pass
@@ -33,10 +31,9 @@ VOCAB_FILES_NAMES = {"vocab_file": "tokenizer.model"}
 
 SPIECE_UNDERLINE = "▁"
 
-
-class GemmaTokenizer(PreTrainedTokenizer):
+class GemmoeTokenizer(PreTrainedTokenizer):
     """
-    Construct a Gemma tokenizer. Based on byte-level Byte-Pair-Encoding. The default padding token is unset as there is
+    Construct a Gemmoe tokenizer. Based on byte-level Byte-Pair-Encoding. The default padding token is unset as there is
     no padding token in the original model.
 
     Args:
@@ -56,18 +53,14 @@ class GemmaTokenizer(PreTrainedTokenizer):
             Will be passed to the `SentencePieceProcessor.__init__()` method. The [Python wrapper for
             SentencePiece](https://github.com/google/sentencepiece/tree/master/python) can be used, among other things,
             to set:
-
             - `enable_sampling`: Enable subword regularization.
             - `nbest_size`: Sampling parameters for unigram. Invalid for BPE-Dropout.
-
-              - `nbest_size = {0,1}`: No sampling is performed.
-              - `nbest_size > 1`: samples from the nbest_size results.
-              - `nbest_size < 0`: assuming that nbest_size is infinite and samples from the all hypothesis (lattice)
-                using forward-filtering-and-backward-sampling algorithm.
-
+                - `nbest_size = {0,1}`: No sampling is performed.
+                - `nbest_size > 1`: samples from the nbest_size results.
+                - `nbest_size < 0`: assuming that nbest_size is infinite and samples from the all hypothesis (lattice)
+                  using forward-filtering-and-backward-sampling algorithm.
             - `alpha`: Smoothing parameter for unigram sampling, and dropout probability of merge operations for
               BPE-dropout.
-
         add_bos_token (`bool`, *optional*, defaults to `True`):
             Whether or not to add an `bos_token` at the start of sequences.
         add_eos_token (`bool`, *optional*, defaults to `False`):
@@ -76,7 +69,7 @@ class GemmaTokenizer(PreTrainedTokenizer):
             Whether or not to cleanup spaces after decoding, cleanup consists in removing potential artifacts like
             extra spaces.
         use_default_system_prompt (`bool`, *optional*, defaults to `False`):
-            Whether or not the default system prompt for Gemma should be used.
+            Whether or not the default system prompt for Gemmoe should be used.
         spaces_between_special_tokens (`bool`, *optional*, defaults to `False`):
             Whether or not to add spaces between special tokens.
     """
@@ -127,26 +120,22 @@ class GemmaTokenizer(PreTrainedTokenizer):
             **kwargs,
         )
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.__getstate__
     def __getstate__(self):
         state = self.__dict__.copy()
         state["sp_model"] = None
         state["sp_model_proto"] = self.sp_model.serialized_model_proto()
         return state
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.__setstate__
     def __setstate__(self, d):
         self.__dict__ = d
         self.sp_model = spm.SentencePieceProcessor(**self.sp_model_kwargs)
         self.sp_model.LoadFromSerializedProto(self.sp_model_proto)
 
     @property
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.vocab_size
     def vocab_size(self):
         """Returns vocab size"""
         return self.sp_model.get_piece_size()
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.get_vocab
     def get_vocab(self):
         """Returns vocab as a dict"""
         vocab = {self.convert_ids_to_tokens(i): i for i in range(self.vocab_size)}
@@ -155,16 +144,14 @@ class GemmaTokenizer(PreTrainedTokenizer):
 
     def _tokenize(self, text, **kwargs):
         """
-        Returns a tokenized string. The Gemma tokenizer never adds a prefix space.
+        Returns a tokenized string. The Gemmoe tokenizer never adds a prefix space.
         """
         return self.sp_model.encode(text, out_type=str)
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer._convert_token_to_id
     def _convert_token_to_id(self, token):
         """Converts a token (str) in an id using the vocab."""
         return self.sp_model.piece_to_id(token)
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer._convert_id_to_token
     def _convert_id_to_token(self, index):
         """Converts an index (integer) in a token (str) using the vocab."""
         token = self.sp_model.IdToPiece(index)
@@ -191,12 +178,10 @@ class GemmaTokenizer(PreTrainedTokenizer):
                 current_sub_text.append(ids)
         if current_sub_text:
             sub_texts.append(self.sp_model.decode(current_sub_text))
-
         if spaces_between_special_tokens:
             sub_texts = " ".join(sub_texts)
         else:
             sub_texts = "".join(sub_texts)
-
         return sub_texts
 
     def convert_tokens_to_string(self, tokens):
@@ -213,7 +198,6 @@ class GemmaTokenizer(PreTrainedTokenizer):
         out_string += self.sp_model.decode(current_sub_tokens)
         return out_string
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.save_vocabulary
     def save_vocabulary(self, save_directory, filename_prefix: Optional[str] = None) -> Tuple[str]:
         """
         Save the vocabulary and special tokens file to a directory.
@@ -241,19 +225,14 @@ class GemmaTokenizer(PreTrainedTokenizer):
 
         return (out_vocab_file,)
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.build_inputs_with_special_tokens
     def build_inputs_with_special_tokens(self, token_ids_0, token_ids_1=None):
         bos_token_id = [self.bos_token_id] if self.add_bos_token else []
         eos_token_id = [self.eos_token_id] if self.add_eos_token else []
-
         output = bos_token_id + token_ids_0 + eos_token_id
-
         if token_ids_1 is not None:
             output = output + bos_token_id + token_ids_1 + eos_token_id
-
         return output
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.get_special_tokens_mask
     def get_special_tokens_mask(
         self, token_ids_0: List[int], token_ids_1: Optional[List[int]] = None, already_has_special_tokens: bool = False
     ) -> List[int]:
@@ -291,7 +270,6 @@ class GemmaTokenizer(PreTrainedTokenizer):
             + eos_token_id
         )
 
-    # Copied from transformers.models.llama.tokenization_llama.LlamaTokenizer.create_token_type_ids_from_sequences
     def create_token_type_ids_from_sequences(
         self, token_ids_0: List[int], token_ids_1: Optional[List[int]] = None
     ) -> List[int]:
@@ -314,13 +292,20 @@ class GemmaTokenizer(PreTrainedTokenizer):
 
         Returns:
             `List[int]`: List of [token type IDs](../glossary#token-type-ids) according to the given sequence(s).
-        """
+"""
         bos_token_id = [self.bos_token_id] if self.add_bos_token else []
         eos_token_id = [self.eos_token_id] if self.add_eos_token else []
-
         output = [0] * len(bos_token_id + token_ids_0 + eos_token_id)
-
         if token_ids_1 is not None:
             output += [1] * len(bos_token_id + token_ids_1 + eos_token_id)
+            return output
 
-        return output
+    def _build_conversation_input_ids(self, conversation: List[List[int]]) -> List[int]:
+        input_ids = []
+        for i, history in enumerate(conversation):
+            if i % 2 == 0:
+                input_ids.extend([self.bos_token_id, self.convert_tokens_to_ids("<start_of_turn>")] + history + [self.convert_tokens_to_ids("<end_of_turn>")])
+            else:
+                input_ids.extend([self.bos_token_id, self.convert_tokens_to_ids("<start_of_turn>"), self.convert_tokens_to_ids("model")] + history + [self.convert_tokens_to_ids("<end_of_turn>\n")])
+        input_ids.append(self.eos_token_id)
+        return input_ids

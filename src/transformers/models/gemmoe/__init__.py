@@ -24,7 +24,7 @@ from ...utils import (
 
 
 _import_structure = {
-    "configuration_gemma": ["GEMMA_PRETRAINED_CONFIG_ARCHIVE_MAP", "GemmaConfig"],
+    "configuration_gemmoe": ["GEMMOE_PRETRAINED_CONFIG_ARCHIVE_MAP", "GemmoeConfig"],
 }
 
 try:
@@ -33,7 +33,7 @@ try:
 except OptionalDependencyNotAvailable:
     pass
 else:
-    _import_structure["tokenization_gemma"] = ["GemmaTokenizer"]
+    _import_structure["tokenization_gemmoe"] = ["GemmoeTokenizer"]
 
 try:
     if not is_tokenizers_available():
@@ -41,7 +41,7 @@ try:
 except OptionalDependencyNotAvailable:
     pass
 else:
-    _import_structure["tokenization_gemma_fast"] = ["GemmaTokenizerFast"]
+    _import_structure["tokenization_gemmoe_fast"] = ["GemmoeTokenizerFast"]
 
 
 try:
@@ -50,11 +50,11 @@ try:
 except OptionalDependencyNotAvailable:
     pass
 else:
-    _import_structure["modeling_gemma"] = [
-        "GemmaForCausalLM",
-        "GemmaModel",
-        "GemmaPreTrainedModel",
-        "GemmaForSequenceClassification",
+    _import_structure["modeling_gemmoe"] = [
+        "GemmoeForCausalLM",
+        "GemmoeModel",
+        "GemmoePreTrainedModel",
+        "GemmoeForSequenceClassification",
     ]
 
 try:
@@ -63,15 +63,15 @@ try:
 except OptionalDependencyNotAvailable:
     pass
 else:
-    _import_structure["modeling_flax_gemma"] = [
-        "FlaxGemmaForCausalLM",
-        "FlaxGemmaModel",
-        "FlaxGemmaPreTrainedModel",
+    _import_structure["modeling_flax_gemmoe"] = [
+        "FlaxGemmoeForCausalLM",
+        "FlaxGemmoeModel",
+        "FlaxGemmoePreTrainedModel",
     ]
 
 
 if TYPE_CHECKING:
-    from .configuration_gemma import GEMMA_PRETRAINED_CONFIG_ARCHIVE_MAP, GemmaConfig
+    from .configuration_gemmoe import GEMMOE_PRETRAINED_CONFIG_ARCHIVE_MAP, GemmoeConfig
 
     try:
         if not is_sentencepiece_available():
@@ -79,7 +79,7 @@ if TYPE_CHECKING:
     except OptionalDependencyNotAvailable:
         pass
     else:
-        from .tokenization_gemma import GemmaTokenizer
+        from .tokenization_gemmoe import GemmoeTokenizer
 
     try:
         if not is_tokenizers_available():
@@ -87,7 +87,7 @@ if TYPE_CHECKING:
     except OptionalDependencyNotAvailable:
         pass
     else:
-        from .tokenization_gemma_fast import GemmaTokenizerFast
+        from .tokenization_gemmoe_fast import GemmoeTokenizerFast
 
     try:
         if not is_torch_available():
@@ -95,11 +95,11 @@ if TYPE_CHECKING:
     except OptionalDependencyNotAvailable:
         pass
     else:
-        from .modeling_gemma import (
-            GemmaForCausalLM,
-            GemmaForSequenceClassification,
-            GemmaModel,
-            GemmaPreTrainedModel,
+        from .modeling_gemmoe import (
+            GemmoeForCausalLM,
+            GemmoeForSequenceClassification,
+            GemmoeModel,
+            GemmoePreTrainedModel,
         )
 
     try:
@@ -108,10 +108,10 @@ if TYPE_CHECKING:
     except OptionalDependencyNotAvailable:
         pass
     else:
-        from .modeling_flax_gemma import (
-            FlaxGemmaForCausalLM,
-            FlaxGemmaModel,
-            FlaxGemmaPreTrainedModel,
+        from .modeling_flax_gemmoe import (
+            FlaxGemmoeForCausalLM,
+            FlaxGemmoeModel,
+            FlaxGemmoePreTrainedModel,
         )
 
 
