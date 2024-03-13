@@ -377,9 +377,7 @@ class GemmoeFlashAttention2(GemmoeAttention):
     """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # TODO: Should be removed once Flash Attention for RoCm is bumped to 2.1.
-        # flash_attn<2.1 generates top-left aligned causal mask, while what is needed here is bottom-right alignement, that was made default for flash_attn>=2.1. This attribute is used to handle this difference. Reference: https://github.com/Dao-AILab/flash-attention/releases/tag/v2.1.0.
-        # Beware that with flash_attn<2.1, using q_seqlen != k_seqlen (except for the case q_seqlen == 1) produces a wrong mask (top-left).
+        # TODO: Remove this attribute once Flash Attention for RoCm is bumped to 2.1.
         self._flash_attn_uses_top_left_mask = not is_flash_attn_greater_or_equal_2_10()
 
     def forward(
@@ -1082,6 +1080,7 @@ class GemmoeModel(GemmoePreTrainedModel):
 
 		# support going beyond cached `max_position_embedding`
 		if seq_length > self.causal_mask.shape[-1]:
+			logger.info(f"Resizing causal mask buffer from {self.causal_mask.shape[-1]} to {2 * self.causal_mask.shape[-1]}")
 			causal_mask = torch.full((2 * self.causal_mask.shape[-1], 2 * self.causal_mask.shape[-1]), fill_value=1)
 			self.register_buffer("causal_mask", torch.triu(causal_mask, diagonal=1), persistent=False)
 
